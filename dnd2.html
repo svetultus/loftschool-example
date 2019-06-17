@@ -90,8 +90,12 @@
 
             document.addEventListener('dragover', (e) => {
                 const zone = getCurrentZone(e.target);
-
                 if (zone) {
+                    e.preventDefault();
+                } else if (e.target.classList.contains('item')) {
+                    e.preventDefault();
+                }
+                if (e.target === document.body || e.target === document.querySelector('html') || e.target === document.querySelector('.container')) {
                     e.preventDefault();
                 }
             });
@@ -101,13 +105,27 @@
                     const zone = getCurrentZone(e.target);
 
                     e.preventDefault();
-
-                    if (zone && currentDrag.startZone !== zone) {
+                    if (zone) {
                         if (e.target.classList.contains('item')) {
-                            zone.insertBefore(currentDrag.node, e.target.nextElementSibling);
+                            let halfWidth = Math.round(e.target.clientWidth/2);
+                            let x, targetX;
+
+                            x = e.pageX;
+                            targetX = e.target.offsetLeft;
+
+                            // если мышь отпустили левее середины целевого элемента
+                            if (targetX + halfWidth > x) {
+                                zone.insertBefore(currentDrag.node, e.target);
+                            }
+                            else {
+                                zone.insertBefore(currentDrag.node, e.target.nextElementSibling);
+                            }
+                            
                         } else {
                             zone.insertBefore(currentDrag.node, zone.lastElementChild);
                         }
+                    } else {
+                        currentDrag.node.parentElement.removeChild(currentDrag.node);
                     }
 
                     currentDrag = null;
