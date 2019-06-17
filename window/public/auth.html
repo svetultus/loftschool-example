@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Авторизация</title>
+        <style>
+            .field {
+                width: auto;
+                margin-bottom: 10px;
+            }
+
+            .field input {
+                width: 100%;
+                box-sizing: border-box;
+                line-height: 20px;
+                border-radius: 3px;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="field">
+            <input type="text" placeholder="логин" id="login">
+        </div>
+        <div class="field">
+            <input type="password" placeholder="пароль" id="password">
+        </div>
+
+        <button id="enter">войти</button>
+        <div id="result"></div>
+
+        <script>
+            const enter = document.querySelector('#enter');
+            const login = document.querySelector('#login');
+            const password = document.querySelector('#password');
+            const result = document.querySelector('#result');
+
+            enter.addEventListener('click', async () => {
+                const data = JSON.stringify({ login: login.value, password: password.value });
+
+                const response = await fetch('/auth', {
+                    method: 'post',
+                    body: data,
+                    headers: { 'content-type': 'application/json' }
+                });
+                const dataJSON = await response.json();
+
+                if (dataJSON.ok) {
+                    opener.postMessage({
+                        ok: true,
+                        loftschool: true,
+                        user: dataJSON.user
+                    }, '*');
+                    result.innerText = '';
+                } else if (dataJSON.error) {
+                    result.innerText = dataJSON.error.message;
+                }
+            });
+        </script>
+    </body>
+</html>
+
+
+page -> auth -> server -> DB
+page <- auth <- server <- DB

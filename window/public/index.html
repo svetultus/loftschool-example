@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Title</title>
+    </head>
+    <body>
+        <button id="auth">авторизоваться</button>
+        <div id="result"></div>
+
+        <script>
+            auth.addEventListener('click', () => {
+                openAuthWindow()
+                    .then(user => {
+                        auth.disabled = true;
+                        result.innerText = `Авторизован ${user.name} ${user.lastName}`;
+                    })
+                    .catch(() => {
+                        result.innerText = 'Ошибка';
+                    });
+            });
+
+            function openAuthWindow() {
+                return new Promise((resolve, reject) => {
+                    const authWindow = open('auth.html', '', 'width=500,height=500');
+                    const unloadHandler = () => {
+                        reject();
+
+                        removeEventListener('message', messageHandler);
+                        authWindow.removeEventListener('beforeunload', unloadHandler);
+                    };
+                    const messageHandler = event => {
+                        if (event.data.loftschool) {
+                            if (event.data.ok) {
+                                resolve(event.data.user);
+
+                                removeEventListener('message', messageHandler);
+                                authWindow.removeEventListener('beforeunload', unloadHandler);
+                                authWindow.close();
+                            } else {
+                                reject();
+                            }
+                        }
+                    };
+
+                    authWindow.addEventListener('beforeunload', unloadHandler);
+                    window.addEventListener('message', messageHandler);
+                });
+            }
+        </script>
+    </body>
+</html>
