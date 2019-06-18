@@ -103,26 +103,41 @@
             document.addEventListener('drop', (e) => {
                 if (currentDrag) {
                     const zone = getCurrentZone(e.target);
+                    let x, y, targetX;
+                    let halfWidth = Math.round(e.target.clientWidth/2);
+                    let deltaY = 12;
+
+                    console.log(e.target);
 
                     e.preventDefault();
                     if (zone) {
                         if (e.target.classList.contains('item')) {
-                            let halfWidth = Math.round(e.target.clientWidth/2);
-                            let x, targetX;
-
                             x = e.pageX;
                             targetX = e.target.offsetLeft;
 
-                            // если мышь отпустили левее середины целевого элемента
+                            // если мышь отпустили левее середины целевого элемента, но попали на элемент
                             if (targetX + halfWidth > x) {
                                 zone.insertBefore(currentDrag.node, e.target);
                             }
                             else {
                                 zone.insertBefore(currentDrag.node, e.target.nextElementSibling);
                             }
-                            
-                        } else {
-                            zone.insertBefore(currentDrag.node, zone.lastElementChild);
+                        } 
+                        // если отпустили мышь рядом с элементом, но на него не попали
+                        else if (zone === e.target) { 
+                            // ищем ближайшего соседа
+                            console.log('ищем ближайшего соседа');
+                            let prev = getPrevElem(e, zone, 20);
+
+                            if (prev) {
+                                if (prev.nextElementSibling.classList.contains('new-item')) {
+                                    zone.insertBefore(currentDrag.node, zone.lastElementChild);
+                                } else {
+                                    zone.insertBefore(currentDrag.node, prev);
+                                }
+                            } else {
+                                zone.insertBefore(currentDrag.node, zone.lastElementChild);
+                            }
                         }
                     } else {
                         currentDrag.node.parentElement.removeChild(currentDrag.node);
@@ -153,6 +168,47 @@
                 } while (from = from.parentElement);
 
                 return null;
+            }
+
+            function getPrevElem (e, zone, delta) {
+                x = e.pageX;
+                y = e.pageY;
+                let result;
+                let items = zone.querySelectorAll('.item');
+                
+                let itemsRow = Array.prototype.filter.call(items, (element) => {
+                    return ( y >= (element.offsetTop - delta) 
+                        && y <= (element.offsetTop + element.clientHeight + delta) );
+                    });
+                items = itemsRow.filter((element) => {
+                    return (x >= (element.offsetLeft - delta) 
+                        && x <= (element.offsetLeft + element.clientWidth + delta))
+                });
+
+                switch (items.length) {
+                    case 0:
+                        result = false;
+                        break;
+                    case 1:
+                        if (items[0] === itemsRow[0]) {
+                            console.log ('был самый левый элемент');
+                            result = items[0];
+                        } else if (items[0] === itemsRow[itemsRow.length-1]) {
+                            console.log ('был самый правый элемент');
+                            result = (items[0].nextElementSibling.classList.contains('new-item')) ? items[0] : items[0].nextElementSibling;
+                        }
+                        console.log(result);
+                        
+                        break;
+                    case 2:
+                        result = items[1];
+                        break;
+                    default:
+                        result = false;
+                        break;
+                }
+
+                return result;
             }
         </script>
     </body>
