@@ -107,8 +107,6 @@
                     let halfWidth = Math.round(e.target.clientWidth/2);
                     let deltaY = 12;
 
-                    console.log(e.target);
-
                     e.preventDefault();
                     if (zone) {
                         if (e.target.classList.contains('item')) {
@@ -126,7 +124,6 @@
                         // если отпустили мышь рядом с элементом, но на него не попали
                         else if (zone === e.target) { 
                             // ищем ближайшего соседа
-                            console.log('ищем ближайшего соседа');
                             let prev = getPrevElem(e, zone, 20);
 
                             if (prev) {
@@ -175,11 +172,13 @@
                 y = e.pageY;
                 let result;
                 let items = zone.querySelectorAll('.item');
-                
+
+                //выбираем ряд элементов, ближайших по Y
                 let itemsRow = Array.prototype.filter.call(items, (element) => {
                     return ( y >= (element.offsetTop - delta) 
                         && y <= (element.offsetTop + element.clientHeight + delta) );
                     });
+                // из них выбираем элементы, ближайшие по X
                 items = itemsRow.filter((element) => {
                     return (x >= (element.offsetLeft - delta) 
                         && x <= (element.offsetLeft + element.clientWidth + delta))
@@ -191,14 +190,12 @@
                         break;
                     case 1:
                         if (items[0] === itemsRow[0]) {
-                            console.log ('был самый левый элемент');
+                            //был выбран самый левый элемент в ряду
                             result = items[0];
                         } else if (items[0] === itemsRow[itemsRow.length-1]) {
-                            console.log ('был самый правый элемент');
+                            //был выбран самый правый элемент в ряду
                             result = (items[0].nextElementSibling.classList.contains('new-item')) ? items[0] : items[0].nextElementSibling;
                         }
-                        console.log(result);
-                        
                         break;
                     case 2:
                         result = items[1];
