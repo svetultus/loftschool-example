@@ -15,19 +15,20 @@ rules.push({
 
 module.exports = {
     entry: {
-        index: './src/index.js',
-        towns: './src/towns.js'
+        index: './src/index.js'
     },
     devServer: {
-        index: './dist/index.html'
+        contentBase: './dist'
     },
     output: {
         filename: '[name].js',
-        path: path.resolve('dist')
+        path: path.resolve('dist'),
+        publicPath: '/'
     },
     devtool: 'source-map',
     module: { rules },
     plugins: [
+        //new CleanWebpackPlugin(['dist']),
         // new webpack.optimize.UglifyJsPlugin({
         //     sourceMap: true,
         //     compress: {
@@ -36,17 +37,17 @@ module.exports = {
         //     }
         // }),
         new ExtractTextPlugin('styles.css'),
-        // new HtmlPlugin({
-        //     title: 'Main Homework',
-        //     template: 'main.hbs',
-        //     chunks: ['index']
-        // }),
         new HtmlPlugin({
-            title: 'towns',
-            template: 'src/towns.hbs',
-            //filename: 'towns.html',
-            chunks: ['towns']
+            title: 'Yandex Maps',
+            template: './src/index.hbs',
+            filename: 'index.html',
+            chunks: ['index']
         }),
-        //new CleanWebpackPlugin(['dist'])
+        // new HtmlPlugin({
+        //     title: 'towns',
+        //     template: 'src/towns.hbs',
+        //     //filename: 'towns.html',
+        //     chunks: ['towns']
+        // }),
     ]
 };

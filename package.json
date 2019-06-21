@@ -7,7 +7,7 @@
     "codestyle": "eslint src",
     "travis": "npm run codestyle && npm test",
     "build": "webpack --progress --colors",
-    "watch": "webpack-dev-server --progress --colors --open",
+    "watch": "webpack-dev-server --progress --colors",
     "start": "npm run watch",
     "test": "karma start",
     "cover": "istanbul cover _mocha -- test/*.js",

@@ -14,7 +14,7 @@ module.exports = [
         loader: 'file-loader',
         options: {
             name: '[hash:8].[ext]',
-            outputPath: 'reosurces'
+            outputPath: 'resources'
         }
     }
 ];
