@@ -15,7 +15,7 @@ rules.push({
 
 module.exports = {
     entry: {
-        index: './src/index.js'
+        index: './src/ymaps.js'
     },
     devServer: {
         contentBase: './dist'
