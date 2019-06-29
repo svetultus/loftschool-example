@@ -1,8 +1,17 @@
+/* eslint-disable no-unused-vars */
 var reviews = {};
 var currentCoords;
 var balloon;
 var point;
-var myMap, objectManager;
+var myMap;
+var dateOptions = {
+    year: 'numeric',
+    month: 'numeric',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: 'numeric',
+    second: 'numeric'
+  };
 
 ymaps.ready(function () {
     myMap = new ymaps.Map('map', {
@@ -10,246 +19,233 @@ ymaps.ready(function () {
         zoom: 10,
         controls: []
     });
-    objectManager = new ymaps.ObjectManager({
-        clusterize: true,
-        clusterDisableClickZoom: true
-    });
-    myMap.geoObjects.add(objectManager);
 
-    var BaloonLayoutClass = ymaps.templateLayoutFactory.createClass(
-        '11'+
-        ' 22 {{ properties.orgName }} 44 {{ properties.reviewText }} <form id="mapReviewForm">'+
-        '<form id="mapReviewForm">33'+
-        '<input type="text" name="userName" />'+
-        '<input type="text" name="orgName" />'+
-        '<textarea name="reviewText" rows="5"></textarea>'+
-        '<button type="submit" class="mapReviewFormSubmit">Отправить</button>'+
-        '</form>', {
-            build: function () {
-                BaloonLayoutClass.superclass.build.call(this);
+    var customItemContentLayoutHTML = 
+        '<div>' +
+            '{{ properties.balloonContentHeader|raw }}'+
+            '<div>' +
+                '{{ properties.reviewUserName|raw }}' +
+                '{{ properties.reviewOrgName|raw }}' +
+                '{{ properties.reviewTime|raw }}' +
+            '</div>' +
+            '<div>' +
+                '{{ properties.reviewReviewText|raw }}' +
+            '</div>' +
+            //'{{ properties.reviewAddress|raw }}' +
+            '<div class="balloonContentBodyEmpty">Отзывов пока нет...</div>' +
+        '</div>' +
+        '<div id="mapReviewFormWrapper"  class="mapReview">'+
+            '<div class="balloonContentH1">Ваш отзыв</div>'+
+            '<form id="mapReviewForm">' +
+                '<div>' +
+                    '<input type="text" name="userName" placeholder="Ваше имя" />' +
+                '</div>' +
+                '<div>' +
+                    '<input type="text" name="orgName"placeholder="Укажите место"  />' +
+                '</div>' +
+                '<div>' +
+                    '<textarea name="reviewText" placeholder="Поделитесь впечатлениями" rows="5"></textarea>' +
+                '</div>' +
+                '<div>' +
+                    '<button type="submit" class="mapReviewFormSubmit">Добавить</button>' +
+                '</div>' +
+            '</form>'+
+        '</div>';
+    var customClusterContentLayoutHTML = 
+        '<div class="mapReview">'+
+            '<div>' +
+                '<div>' +
+                    '{{ properties.reviewOrgName|raw }}' +
+                '</div>' +
+                '<div class="address">' +
+                    '<a href="#" class="linkAddress">' +
+                        '{{ properties.reviewAddress|raw }}' +
+                    '</a>' +
+                '</div>' +
+                '<div>' +
+                    '{{ properties.reviewReviewText|raw }}' +
+                '</div>' +
+                '<div>' +
+                    '{{ properties.reviewTime|raw }}' +
+                '</div>' +
+                //'{{ properties.reviewAddress|raw }}' +
+            '</div>' +
+        '</div>';
+    var customItemContentLayout = ymaps.templateLayoutFactory.createClass(
+        customItemContentLayoutHTML, {
+            build:  function () {
+                customItemContentLayout.superclass.build.call(this);
                 let form = document.getElementById('mapReviewForm');
+
                 form.onsubmit = this.onMapReviewFormSubmit;
             },
 
             clear: function () {
                 let form = document.getElementById('mapReviewForm');
+
                 form.onsubmit = null;
-                BaloonLayoutClass.superclass.clear.call(this);
+                customItemContentLayout.superclass.clear.call(this);
             },
 
-            onMapReviewFormSubmit: function (e) {
+            onMapReviewFormSubmit: async function (e) {
                 e.preventDefault();
 
-                let [userName, orgName , reviewText] = [this.userName.value, this.orgName.value, this.reviewText.value];
-                console.log(userName);
-                console.log(orgName);
-                console.log(reviewText);
-                console.log(currentCoords);
-
-                myMap.geoObjects.add(new ymaps.Placemark(currentCoords), {
-                    userName: userName,
-                    orgName: orgName,
-                    reviewText: reviewText || 'нет отзывов'
-                },{
-                    contentLayout: BaloonLayoutClass,
-                    balloonPanelMaxMapArea: 0
-                });
-                // myMap.balloon.close();
-
-                // return false;
-            }
-        }
-    );
-
-    myMap.events.add('click', async function (e) {
-        point = await getMapPosition(e);
-        currentCoords = point.coords;
-        console.log(currentCoords);
-        showBaloon (e);
-        // myMap.balloon.close();
-        // myMap.balloon.setOptions({contentLayout: BaloonLayoutClass});
-        // myMap.balloon.open(currentCoords, "Содержимое балуна", {
-            //contentLayout: BaloonLayoutClass
-        //});
-    });
-    
-
-    objectManager.objects.events.add('balloonopen', async function (e) {
-        console.log(e);
-        // Получим объект, на котором открылся балун.
-        var id = e.get('objectId'),
-            geoObject = objectManager.objects.getById(id);
-            currentCoords = geoObject.geometry.coordinates;
-        // Загрузим данные для объекта при необходимости.
-        await downloadContent([geoObject], id);
-
-        document.getElementById('mapReviewForm').addEventListener('submit', function (e) {
-            e.preventDefault();
-            console.log('form submit2'); 
-            onMapReviewFormSubmit(e);
-        });
-    });
-
-    objectManager.clusters.events.add('balloonopen', async function (e) {
-        // Получим id кластера, на котором открылся балун.
-        var id = e.get('objectId'),
-        // Получим геообъекты внутри кластера.
-            cluster = objectManager.clusters.getById(id),
-            geoObjects = cluster.properties.geoObjects;
-
-            currentCoords = cluster.geometry.coordinates;
-        // Загрузим данные для объектов при необходимости.
-        await downloadContent(geoObjects, id, true);
-        document.getElementById('mapReviewForm').addEventListener('submit', function (e) {
-            e.preventDefault();
-            console.log('form submit3'); 
-            onMapReviewFormSubmit(e);
-        });
-    });
-
-    function downloadContent(geoObjects, id, isCluster) {
-        // Формируем массив идентификаторов
-        var ids = geoObjects.map(function (geoObject) {
-                    return geoObject.id;
-                });
-        if (ids.length) {
-            //objectManager.objects.balloon.contentLayout = BaloonLayoutClass;
-            // geoObjects.forEach(function (geoObject) {
-            //     geoObject.properties.balloonContent = 
-            //     '<form id="mapReviewForm">'+
-            //     '<input type="text" name="userName" />'+
-            //     '<input type="text" name="orgName" />'+
-            //     '<textarea name="reviewText" rows="5"></textarea>'+
-            //     '<button type="submit" class="mapReviewFormSubmit">Отправить</button>'+
-            //     '</form>';
-                
-            // });
-            // Оповещаем балун, что нужно применить новые данные.
-            setNewData();
-        }
-
-        function setNewData(){
-            if (isCluster && objectManager.clusters.balloon.isOpen(id)) {
-                objectManager.clusters.balloon.setData(objectManager.clusters.balloon.getData());
-            } else if (objectManager.objects.balloon.isOpen(id)) {
-                objectManager.objects.balloon.setData(objectManager.objects.balloon.getData());
-            }
-        }
-    }
-
-    function onMapReviewFormSubmit (e) {
-        e.preventDefault();
-        let obj = e.target;
-        let [userName, orgName , reviewText] = [obj.userName.value, obj.orgName.value, obj.reviewText.value];
-
-        console.log(userName);
-        console.log(orgName);
-        console.log(reviewText);
-        console.log(currentCoords);
-        myMap.geoObjects.add(new ymaps.Placemark(currentCoords), {
-            userName: userName,
-            orgName: orgName,
-            reviewText: reviewText || 'нет отзывов',
-        },{
-            //balloonContentBody: reviewText,
-            contentLayout: BaloonLayoutClass,
-            balloonPanelMaxMapArea: 0
-        });
-        //myMap.balloon.close();
-
-        return false;
-    }
-
-    $.ajax({
-        url: "data.json"
-    }).done(function (data) {
-        objectManager.add(data);
-    });
-});
-
-async function createBalloon(data, myMap) {
-
-    var BaloonLayoutClass = ymaps.templateLayoutFactory.createClass(
-        '11'+
-        data.userName +
-        ' 22 {{ properties.orgName }} 44 {{ properties.reviewText }} <form id="mapReviewForm">'+
-        '<input type="text" name="userName" />'+
-        '<input type="text" name="orgName" />'+
-        '<textarea name="reviewText" rows="5"></textarea>'+
-        '<button type="submit" class="mapReviewFormSubmit">Отправить</button>'+
-        '</form>', {
-            build: function () {
-
-                BaloonLayoutClass.superclass.build.call(this);
-                let form = document.getElementById('mapReviewForm');
-                form.onsubmit = this.onMapReviewFormSubmit;
-            },
-
-            clear: function () {
-                let form = document.getElementById('mapReviewForm');
-                form.onsubmit = null;
-                BaloonLayoutClass.superclass.clear.call(this);
-            },
-
-            onMapReviewFormSubmit: function (e) {
-                e.preventDefault();
-                let [userName, orgName , reviewText] = [this.userName.value, this.orgName.value, this.reviewText.value];
-                console.log(userName);
-                console.log(orgName);
-                console.log(reviewText);
-                myMap.geoObjects.add(new ymaps.Placemark(data.coords), {
-                    userName: userName,
-                    orgName: orgName,
-                    reviewText: reviewText || 'нет отзывов'
-                },{
-                    contentLayout: BaloonLayoutClass,
-                    // Запретим замену обычного балуна на балун-панель.
-                    // Если не указывать эту опцию, на картах маленького размера откроется балун-панель.
-                    balloonPanelMaxMapArea: 0
-                });
-                
-                if (!data.reviews) {
-                    reviews[data.coords] = []
-                    
+                let res = await ymaps.geocode(currentCoords)
+                let address = await res.geoObjects.get(0).properties.get('text');
+                let form = document.querySelector('#mapReviewForm');
+                let formWrapper = document.querySelector('#mapReviewFormWrapper');
+                let date = new Date();
+                date = date.toLocaleDateString("ru", dateOptions);
+                let review = {
+                    userName: this.userName.value,
+                    orgName: this.orgName.value,
+                    reviewText: this.reviewText.value,
+                    address: address,
+                    time: date,
+                    currentCoords: currentCoords
                 };
-                reviews[data.coords].push({
-                    userName: userName,
-                    orgName: orgName,
-                    reviewText: reviewText
+                Object.defineProperty(review, "currentCoords", {enumerable: false});
+                Object.defineProperty(review, "time", {enumerable: false});
+
+                formWrapper.insertBefore(makeHtmlReview(review), form);
+                
+                let Placemark = new ymaps.Placemark(currentCoords, {
+                    balloonContentHeader: address,
+                    balloonContentBody: makeBaloonLayoutReview(review),
+                    //balloonContentFooter: review.time,
+                    reviewUserName: review.userName,
+                    reviewOrgName: review.orgName,
+                    reviewReviewText: review.reviewText,
+                    reviewAddress: review.address,
+                    reviewTime: review.time,
+                    reviewCoords: review.currentCoords
+                }, {
+                    balloonContentBodyLayout: customItemContentLayout,
+                    balloonPanelMaxMapArea: 0,
+                    hasBalloon: false
                 });
 
-                return false;
+                window.clusterer.add(Placemark);
             }
         }
     );
-    console.log(data.coords);
+
+    var customClusterContentLayout = ymaps.templateLayoutFactory.createClass(
+        customClusterContentLayoutHTML, {
+            build: function () {
+                customClusterContentLayout.superclass.build.call(this);
+
+                let object =this._data.geoObject;
+                // let address = document.querySelector('.address');
+                // let linkAddress = document.createElement('a');
+
+                // linkAddress.setAttribute('href', '#');
+                // linkAddress.setAttribute('class', 'linkAddress');
+                // linkAddress.innerText = address.innerText;
+                // address.innerText = '';
+                // address.appendChild(linkAddress);
+                
+                currentCoords = this._data.geoObject.geometry._coordinates;
+                
+                let linkAddress = document.querySelector('.linkAddress');
+                linkAddress.onclick = function(e)  {
+                    e.preventDefault(); 
+                    createBaloon(currentCoords, object);
+                }
+            },
+
+            clear: function () {
+                let linkAddress = document.querySelector('.linkAddress');
+                linkAddress.onclick = null;
+                customClusterContentLayout.superclass.clear.call(this);
+            }
+        }
+    );
     
-    balloon = myMap.balloon.open(data.coords, {
-        reviewText: data.reviews || 'нет отзывов'
-        }, {
-        autoPan: false,
-        contentLayout: BaloonLayoutClass,
-        balloonPanelMaxMapArea: 0
+    window.clusterer = new ymaps.Clusterer({
+        preset: 'islands#invertedVioletClusterIcons',
+        clusterDisableClickZoom: true,
+        clusterBalloonContentLayout: 'cluster#balloonCarousel',
+        clusterBalloonItemContentLayout: customClusterContentLayout
     });
-}
 
-function showBaloon (e) {
-    let data = {};
-    data.coords = point.coords;
-    if (reviews[data.coords]) {
-        data.reviews = reviews[data.currentCoords];
-    } 
+    myMap.geoObjects.add(clusterer);
 
-    data.address = point.address;
-    balloon = createBalloon(data, myMap);
-}
-async function getMapPosition (e) {
-    const coords = e.get('coords');
-    const geocode = await ymaps.geocode(coords);
-    const address = geocode.geoObjects.get(0).properties.get('text')
+    // так посмотрим куда мы кликнули 
+    clusterer.events.add('click', function (e) {
+        var object = e.get('target');
+        let point = e.get('coords');
 
-    return {
-        coords,
-        address
+        console.log(point);
+        currentCoords = point;
+
+        if (!object.getGeoObjects) {
+            createBaloon(object.geometry._coordinates, object);
+        } else {
+            clusterer.balloon.open(clusterer.getClusters()[0]);
+        }
+
+    });
+
+    myMap.events.add('click', function (e) {
+        let point = e.get('coords');
+        currentCoords = point;
+
+        createBaloon(point);
+    });
+
+    function createBaloon(coords, object) {
+        if (window.balloon) {
+            window.balloon.close();
+        }
+        if (clusterer.balloon) {
+            clusterer.balloon.close();
+        }
+        ymaps.geocode(coords)
+            .then(async function (res) {
+                let address =  await res.geoObjects.get(0).properties.get('text');
+                
+                window.balloon = new ymaps.Balloon(myMap, {
+                    contentLayout: customItemContentLayout
+                });
+                console.log(address);
+
+                if (object) {
+                    window.balloon.setData(object);
+                } else {
+                    window.balloon.setData({
+                        balloonContentHeader: address
+                    });
+                }
+                
+                window.balloon.options.setParent(myMap.options);
+                window.balloon.open(coords);
+            });
     }
+})
+
+function makeHtmlReview (obj) {
+    let docFrag = document.createDocumentFragment();
+
+    for (let key in obj) {
+        let elem = document.createElement('div');
+        elem.innerText = obj[key];
+        elem.setAttribute('class', key);
+        docFrag.appendChild(elem);
+    }
+    return docFrag;
 }
+
+function makeBaloonLayoutReview (obj) {
+    let text = '<div class="review">';
+
+    for (let key in obj) {
+        text += `<div class= "${key}">`;
+        text += obj[key];   
+        text += '</div>'
+    }
+    text += '</div>';
+
+    return text;
+}
+
