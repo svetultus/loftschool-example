@@ -12,6 +12,7 @@ function init(){
         clusterize: true,
         clusterDisableClickZoom: true
     });
+    myMap.reviews = {};
     myMap.geoObjects.add(objectManager);
 
     objectManager.objects.events.add('balloonopen', function (e) {
@@ -98,7 +99,7 @@ function init(){
     myMap.geoObjects.add(myCollection);
     myMap.events.add('click', function (e) {
         let that = this;
-        // Получение координат щелчка
+        // Получение координат щелчка 
         currentCoords = e.get('coords');
         // myMap.balloon.close();
         // myMap.balloon.open(currentCoords, "Содержимое балуна", {

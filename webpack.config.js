@@ -5,13 +5,29 @@ let ExtractTextPlugin = require('extract-text-webpack-plugin');
 let rules = require('./webpack.config.rules');
 let path = require('path');
 
+// rules.push({
+//     test: /\.css$/,
+//     use: ExtractTextPlugin.extract({
+//         fallback: 'style-loader',
+//         use: 'css-loader'
+//     })
+// });
+
 rules.push({
-    test: /\.css$/,
-    use: ExtractTextPlugin.extract({
-        fallback: 'style-loader',
-        use: 'css-loader'
-    })
-});
+        test: /\.scss$/,
+        use: ExtractTextPlugin.extract({
+            //publicPath: '../',
+            fallback: 'style-loader',
+            use: ['css-loader', 'sass-loader'],
+        }),
+    },
+    {
+        test: /\.css$/,
+        use: ExtractTextPlugin.extract({
+            fallback: 'style-loader',
+            use: 'css-loader',
+        }),
+    });
 
 module.exports = {
     entry: {
@@ -36,7 +52,7 @@ module.exports = {
         //         warnings: false
         //     }
         // }),
-        new ExtractTextPlugin('styles.css'),
+        new ExtractTextPlugin('./src/[name].css'),
         new HtmlPlugin({
             title: 'Yandex Maps',
             template: './src/index.hbs',

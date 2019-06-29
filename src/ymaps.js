@@ -21,40 +21,47 @@ ymaps.ready(function () {
     });
 
     var customItemContentLayoutHTML = 
-        '<div>' +
-            '{{ properties.balloonContentHeader|raw }}'+
-            '<div>' +
-                '{{ properties.reviewUserName|raw }}' +
-                '{{ properties.reviewOrgName|raw }}' +
-                '{{ properties.reviewTime|raw }}' +
+        '<div class="mapReviewWrapper">' +
+            '<div class="mapReviewItems">' +
+                '<div class="mapReviewItem">' +
+                    '<div class="mapReviewHeader">'+
+                        '{{ properties.balloonContentHeader|raw }}'+
+                    '</div>' +
+                    '<div>' +
+                        '<span class="userName">{{ properties.reviewUserName|raw }}</span>' +
+                        '<span class="orgName">{{ properties.reviewOrgName|raw }}</span>' +
+                        '<span class="time">{{ properties.reviewTime|raw }}</span>' +
+                    '</div>' +
+                    '<div>' +
+                        '{{ properties.reviewReviewText|raw }}' +
+                    '</div>' +
+                    // вот тут надо условно выводить, но не получается
+                    '{{ if (!properties.reviewUserName) { <div class="mapReviewEmpty">Отзывов пока нет...</div> } }}' +
+                    //'<div class="mapReviewEmpty">Отзывов пока нет...</div>' +
+                '</div>' +
+            '</div>' +    
+            '<div id="mapReviewFormWrapper"  class="mapReview mapReview_formWrapper">'+
+                '<div class="mapReviewH1">Ваш отзыв</div>'+
+                '<form id="mapReviewForm" class="mapReviewForm">' +
+                    '<div class="form-row">' +
+                        '<input type="text" name="userName" placeholder="Ваше имя" />' +
+                    '</div>' +
+                    '<div class="form-row">' +
+                        '<input type="text" name="orgName" placeholder="Укажите место"  />' +
+                    '</div>' +
+                    '<div class="form-row">' +
+                        '<textarea name="reviewText" placeholder="Поделитесь впечатлениями" rows="5"></textarea>' +
+                    '</div>' +
+                    '<div class="form-row">' +
+                        '<button type="submit" class="mapReviewFormSubmit">Добавить</button>' +
+                    '</div>' +
+                '</form>'+
             '</div>' +
-            '<div>' +
-                '{{ properties.reviewReviewText|raw }}' +
-            '</div>' +
-            //'{{ properties.reviewAddress|raw }}' +
-            '<div class="balloonContentBodyEmpty">Отзывов пока нет...</div>' +
-        '</div>' +
-        '<div id="mapReviewFormWrapper"  class="mapReview">'+
-            '<div class="balloonContentH1">Ваш отзыв</div>'+
-            '<form id="mapReviewForm">' +
-                '<div>' +
-                    '<input type="text" name="userName" placeholder="Ваше имя" />' +
-                '</div>' +
-                '<div>' +
-                    '<input type="text" name="orgName"placeholder="Укажите место"  />' +
-                '</div>' +
-                '<div>' +
-                    '<textarea name="reviewText" placeholder="Поделитесь впечатлениями" rows="5"></textarea>' +
-                '</div>' +
-                '<div>' +
-                    '<button type="submit" class="mapReviewFormSubmit">Добавить</button>' +
-                '</div>' +
-            '</form>'+
-        '</div>';
+        '</div>' ;
     var customClusterContentLayoutHTML = 
         '<div class="mapReview">'+
             '<div>' +
-                '<div>' +
+                '<div >' +
                     '{{ properties.reviewOrgName|raw }}' +
                 '</div>' +
                 '<div class="address">' +
@@ -92,26 +99,28 @@ ymaps.ready(function () {
 
                 let res = await ymaps.geocode(currentCoords)
                 let address = await res.geoObjects.get(0).properties.get('text');
-                let form = document.querySelector('#mapReviewForm');
-                let formWrapper = document.querySelector('#mapReviewFormWrapper');
-                let date = new Date();
-                date = date.toLocaleDateString("ru", dateOptions);
+                let reviewItems = document.querySelector('.mapReviewItems');
+                let reviewItem = document.querySelector('.mapReviewItems .mapReviewItem');
+                let date = (new Date()).toLocaleDateString("ru", dateOptions);
+                console.log(date);
                 let review = {
                     userName: this.userName.value,
                     orgName: this.orgName.value,
+                    time: date,
                     reviewText: this.reviewText.value,
                     address: address,
-                    time: date,
                     currentCoords: currentCoords
                 };
-                Object.defineProperty(review, "currentCoords", {enumerable: false});
-                Object.defineProperty(review, "time", {enumerable: false});
 
-                formWrapper.insertBefore(makeHtmlReview(review), form);
+                
+                Object.defineProperty(review, "currentCoords", {enumerable: false});
+                Object.defineProperty(review, "address", {enumerable: false});
+
+                reviewItems.insertBefore(makeHtmlReview(review), reviewItem);
                 
                 let Placemark = new ymaps.Placemark(currentCoords, {
                     balloonContentHeader: address,
-                    balloonContentBody: makeBaloonLayoutReview(review),
+                    //balloonContentBody: makeBaloonLayoutReview(review),
                     //balloonContentFooter: review.time,
                     reviewUserName: review.userName,
                     reviewOrgName: review.orgName,
@@ -136,18 +145,10 @@ ymaps.ready(function () {
                 customClusterContentLayout.superclass.build.call(this);
 
                 let object =this._data.geoObject;
-                // let address = document.querySelector('.address');
-                // let linkAddress = document.createElement('a');
-
-                // linkAddress.setAttribute('href', '#');
-                // linkAddress.setAttribute('class', 'linkAddress');
-                // linkAddress.innerText = address.innerText;
-                // address.innerText = '';
-                // address.appendChild(linkAddress);
+                let linkAddress = document.querySelector('.linkAddress');
                 
                 currentCoords = this._data.geoObject.geometry._coordinates;
                 
-                let linkAddress = document.querySelector('.linkAddress');
                 linkAddress.onclick = function(e)  {
                     e.preventDefault(); 
                     createBaloon(currentCoords, object);
@@ -156,6 +157,7 @@ ymaps.ready(function () {
 
             clear: function () {
                 let linkAddress = document.querySelector('.linkAddress');
+
                 linkAddress.onclick = null;
                 customClusterContentLayout.superclass.clear.call(this);
             }
@@ -176,12 +178,14 @@ ymaps.ready(function () {
         var object = e.get('target');
         let point = e.get('coords');
 
-        console.log(point);
         currentCoords = point;
 
         if (!object.getGeoObjects) {
             createBaloon(object.geometry._coordinates, object);
         } else {
+            if (window.balloon) {
+                window.balloon.close();
+            }
             clusterer.balloon.open(clusterer.getClusters()[0]);
         }
 
@@ -225,27 +229,28 @@ ymaps.ready(function () {
 })
 
 function makeHtmlReview (obj) {
-    let docFrag = document.createDocumentFragment();
+    let wrapper = document.createElement('div');
+    wrapper.setAttribute('class', 'mapReviewItem');
 
     for (let key in obj) {
-        let elem = document.createElement('div');
+        let elem = document.createElement('span');
         elem.innerText = obj[key];
         elem.setAttribute('class', key);
-        docFrag.appendChild(elem);
+        wrapper.appendChild(elem);
     }
-    return docFrag;
+    return wrapper;
 }
 
-function makeBaloonLayoutReview (obj) {
-    let text = '<div class="review">';
+// function makeBaloonLayoutReview (obj) { 
+//     let text = '<div class="review">';
 
-    for (let key in obj) {
-        text += `<div class= "${key}">`;
-        text += obj[key];   
-        text += '</div>'
-    }
-    text += '</div>';
+//     for (let key in obj) {
+//         text += `<div class= "${key}">`;
+//         text += obj[key];   
+//         text += '</div>'
+//     }
+//     text += '</div>';
 
-    return text;
-}
+//     return text;
+// }
 
