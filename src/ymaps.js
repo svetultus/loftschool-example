@@ -1,9 +1,11 @@
 /* eslint-disable no-unused-vars */
-var reviews = {};
+var reviews = [];
 var currentCoords;
 var balloon;
 var point;
+var address;
 var myMap;
+var count = 0;
 var dateOptions = {
     year: 'numeric',
     month: 'numeric',
@@ -21,23 +23,31 @@ ymaps.ready(function () {
     });
 
     var customItemContentLayoutHTML = 
+    
         '<div class="mapReviewWrapper">' +
+            '{% for review in reviews %}' +
+                '<div> ttt </div>' +
+            '{% endfor %}' +
+            '{% if !properties.review %}' +
+                '<div class="mapReviewHeader">'+
+                    address +
+                '</div>' +
+                '<div class="mapReviewEmpty">Отзывов пока нет...</div>' +
+            '{% else %}'+
+                '<div class="mapReviewHeader">'+
+                '{{ properties.balloonContentHeader|raw }}'+
+                '</div>' +
+            '{% endif %}'+
             '<div class="mapReviewItems">' +
                 '<div class="mapReviewItem">' +
-                    '<div class="mapReviewHeader">'+
-                        '{{ properties.balloonContentHeader|raw }}'+
+                    '<div>' +
+                        '<span class="userName">{{ properties.review.userName|raw }}</span>' +
+                        '<span class="orgName">{{ properties.review.orgName|raw }}</span>' +
+                        '<span class="time">{{ properties.review.time|raw }}</span>' +
                     '</div>' +
                     '<div>' +
-                        '<span class="userName">{{ properties.reviewUserName|raw }}</span>' +
-                        '<span class="orgName">{{ properties.reviewOrgName|raw }}</span>' +
-                        '<span class="time">{{ properties.reviewTime|raw }}</span>' +
+                        '{{ properties.review.reviewText|raw }}' +
                     '</div>' +
-                    '<div>' +
-                        '{{ properties.reviewReviewText|raw }}' +
-                    '</div>' +
-                    // вот тут надо условно выводить, но не получается
-                    '{{ if (!properties.reviewUserName) { <div class="mapReviewEmpty">Отзывов пока нет...</div> } }}' +
-                    //'<div class="mapReviewEmpty">Отзывов пока нет...</div>' +
                 '</div>' +
             '</div>' +    
             '<div id="mapReviewFormWrapper"  class="mapReview mapReview_formWrapper">'+
@@ -62,20 +72,19 @@ ymaps.ready(function () {
         '<div class="mapReview">'+
             '<div>' +
                 '<div >' +
-                    '{{ properties.reviewOrgName|raw }}' +
+                    '{{ properties.review.orgName|raw }}' +
                 '</div>' +
                 '<div class="address">' +
                     '<a href="#" class="linkAddress">' +
-                        '{{ properties.reviewAddress|raw }}' +
+                        '{{ properties.review.address|raw }}' +
                     '</a>' +
                 '</div>' +
                 '<div>' +
-                    '{{ properties.reviewReviewText|raw }}' +
+                    '{{ properties.review.reviewText|raw }}' +
                 '</div>' +
                 '<div>' +
-                    '{{ properties.reviewTime|raw }}' +
+                    '{{ properties.review.time|raw }}' +
                 '</div>' +
-                //'{{ properties.reviewAddress|raw }}' +
             '</div>' +
         '</div>';
     var customItemContentLayout = ymaps.templateLayoutFactory.createClass(
@@ -83,6 +92,7 @@ ymaps.ready(function () {
             build:  function () {
                 customItemContentLayout.superclass.build.call(this);
                 let form = document.getElementById('mapReviewForm');
+                console.log(reviews);
 
                 form.onsubmit = this.onMapReviewFormSubmit;
             },
@@ -97,42 +107,39 @@ ymaps.ready(function () {
             onMapReviewFormSubmit: async function (e) {
                 e.preventDefault();
 
-                let res = await ymaps.geocode(currentCoords)
-                let address = await res.geoObjects.get(0).properties.get('text');
+                //let res = await ymaps.geocode(currentCoords);
                 let reviewItems = document.querySelector('.mapReviewItems');
                 let reviewItem = document.querySelector('.mapReviewItems .mapReviewItem');
+                let reviewItemsEmpty = document.querySelector('.mapReviewEmpty');
                 let date = (new Date()).toLocaleDateString("ru", dateOptions);
-                console.log(date);
+                //address = await res.geoObjects.get(0).properties.get('text');
+
                 let review = {
                     userName: this.userName.value,
                     orgName: this.orgName.value,
                     time: date,
                     reviewText: this.reviewText.value,
                     address: address,
-                    currentCoords: currentCoords
+                    coords: currentCoords
                 };
-
                 
-                Object.defineProperty(review, "currentCoords", {enumerable: false});
+                Object.defineProperty(review, "coords", {enumerable: false});
                 Object.defineProperty(review, "address", {enumerable: false});
 
                 reviewItems.insertBefore(makeHtmlReview(review), reviewItem);
+                if (reviewItemsEmpty) {
+                    document.querySelector(".mapReviewWrapper").removeChild(reviewItemsEmpty);
+                }
                 
                 let Placemark = new ymaps.Placemark(currentCoords, {
                     balloonContentHeader: address,
-                    //balloonContentBody: makeBaloonLayoutReview(review),
-                    //balloonContentFooter: review.time,
-                    reviewUserName: review.userName,
-                    reviewOrgName: review.orgName,
-                    reviewReviewText: review.reviewText,
-                    reviewAddress: review.address,
-                    reviewTime: review.time,
-                    reviewCoords: review.currentCoords
+                    review: review
                 }, {
                     balloonContentBodyLayout: customItemContentLayout,
                     balloonPanelMaxMapArea: 0,
                     hasBalloon: false
                 });
+                reviews[count++] = review;
 
                 window.clusterer.add(Placemark);
             }
@@ -176,9 +183,7 @@ ymaps.ready(function () {
     // так посмотрим куда мы кликнули 
     clusterer.events.add('click', function (e) {
         var object = e.get('target');
-        let point = e.get('coords');
-
-        currentCoords = point;
+        currentCoords = e.get('coords');
 
         if (!object.getGeoObjects) {
             createBaloon(object.geometry._coordinates, object);
@@ -192,10 +197,9 @@ ymaps.ready(function () {
     });
 
     myMap.events.add('click', function (e) {
-        let point = e.get('coords');
-        currentCoords = point;
+        currentCoords = e.get('coords');
 
-        createBaloon(point);
+        createBaloon(currentCoords);
     });
 
     function createBaloon(coords, object) {
@@ -207,12 +211,11 @@ ymaps.ready(function () {
         }
         ymaps.geocode(coords)
             .then(async function (res) {
-                let address =  await res.geoObjects.get(0).properties.get('text');
+                address =  await res.geoObjects.get(0).properties.get('text');
                 
                 window.balloon = new ymaps.Balloon(myMap, {
                     contentLayout: customItemContentLayout
                 });
-                console.log(address);
 
                 if (object) {
                     window.balloon.setData(object);
@@ -240,17 +243,4 @@ function makeHtmlReview (obj) {
     }
     return wrapper;
 }
-
-// function makeBaloonLayoutReview (obj) { 
-//     let text = '<div class="review">';
-
-//     for (let key in obj) {
-//         text += `<div class= "${key}">`;
-//         text += obj[key];   
-//         text += '</div>'
-//     }
-//     text += '</div>';
-
-//     return text;
-// }
 
