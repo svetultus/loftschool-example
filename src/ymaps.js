@@ -25,12 +25,9 @@ ymaps.ready(function () {
     var customItemContentLayoutHTML = 
     
         '<div class="mapReviewWrapper">' +
-            '{% for review in reviews %}' +
-                '<div> ttt </div>' +
-            '{% endfor %}' +
             '{% if !properties.review %}' +
                 '<div class="mapReviewHeader">'+
-                    address +
+                    '{{ address }} '+
                 '</div>' +
                 '<div class="mapReviewEmpty">Отзывов пока нет...</div>' +
             '{% else %}'+
@@ -92,7 +89,7 @@ ymaps.ready(function () {
             build:  function () {
                 customItemContentLayout.superclass.build.call(this);
                 let form = document.getElementById('mapReviewForm');
-                console.log(reviews);
+                console.log(this);
 
                 form.onsubmit = this.onMapReviewFormSubmit;
             },
@@ -107,12 +104,10 @@ ymaps.ready(function () {
             onMapReviewFormSubmit: async function (e) {
                 e.preventDefault();
 
-                //let res = await ymaps.geocode(currentCoords);
                 let reviewItems = document.querySelector('.mapReviewItems');
                 let reviewItem = document.querySelector('.mapReviewItems .mapReviewItem');
                 let reviewItemsEmpty = document.querySelector('.mapReviewEmpty');
                 let date = (new Date()).toLocaleDateString("ru", dateOptions);
-                //address = await res.geoObjects.get(0).properties.get('text');
 
                 let review = {
                     userName: this.userName.value,
@@ -133,13 +128,19 @@ ymaps.ready(function () {
                 
                 let Placemark = new ymaps.Placemark(currentCoords, {
                     balloonContentHeader: address,
-                    review: review
+                    review: review,
+                    balloonContentFooter: 'sfdsfsf',
                 }, {
                     balloonContentBodyLayout: customItemContentLayout,
                     balloonPanelMaxMapArea: 0,
-                    hasBalloon: false
+                    hasBalloon: false,
+                    preset: 'islands#violetIcon'
                 });
                 reviews[count++] = review;
+
+                this.userName.value = '';
+                this.orgName.value = '';
+                this.reviewText.value = '';
 
                 window.clusterer.add(Placemark);
             }
@@ -219,14 +220,17 @@ ymaps.ready(function () {
 
                 if (object) {
                     window.balloon.setData(object);
+                    window.balloon.options.setParent(myMap.options);
+                    window.balloon.open(coords);
                 } else {
                     window.balloon.setData({
                         balloonContentHeader: address
                     });
+                    window.balloon.options.setParent(myMap.options);
+                    window.balloon.open(coords, {address});
                 }
                 
-                window.balloon.options.setParent(myMap.options);
-                window.balloon.open(coords);
+                
             });
     }
 })

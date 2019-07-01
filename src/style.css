@@ -1,3 +1,132 @@
-body { 
-    font-size: 14px;  
+
+/*ymaps .ymaps-2-1-74-balloon,  */
+
+ymaps .ymaps-2-1-74-balloon_layout_normal { 
+    box-shadow: none;
+    font-size: 15px;
+    font-family: 'Fira Sans', 'Arial', sans-serif;
+    color: #4f4f4f;
+    min-width: 380px;
+    min-height: 530px;
+    margin: auto;
+}
+
+.ymaps-2-1-74-balloon .ymaps-2-1-74-balloon__layout {
+    border-radius: 8px;
+}
+.ymaps-2-1-74-balloon__close + .ymaps-2-1-74-balloon__content {
+    padding-right: 15px !important;
+    margin-right: 0 !important;
+    padding: 0;
+    width: 100%;
+}
+.ymaps-2-1-74-balloon .ymaps-2-1-74-balloon__content > ymaps {
+    /*overflow: hidden !important;*/
+    width: 100% !important;
+    min-width: 335px; 
+    min-height: 530px; 
+}
+.ymaps-2-1-74-balloon__close .ymaps-2-1-74-balloon__close-button {
+    background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAwAAAAMCAYAAABWdVznAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyRpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMy1jMDExIDY2LjE0NTY2MSwgMjAxMi8wMi8wNi0xNDo1NjoyNyAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENTNiAoTWFjaW50b3NoKSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDpDREJGOTI2NTkyQjkxMUU5QTc1OEJFOUEzNkI2NTI3NiIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDpDREJGOTI2NjkyQjkxMUU5QTc1OEJFOUEzNkI2NTI3NiI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSJ4bXAuaWlkOkNEQkY5MjYzOTJCOTExRTlBNzU4QkU5QTM2QjY1Mjc2IiBzdFJlZjpkb2N1bWVudElEPSJ4bXAuZGlkOkNEQkY5MjY0OTJCOTExRTlBNzU4QkU5QTM2QjY1Mjc2Ii8+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3JkZjpSREY+IDwveDp4bXBtZXRhPiA8P3hwYWNrZXQgZW5kPSJyIj8+erc7wgAAAI9JREFUeNqUkV0KgzAQhEfbt57PFHo/vYDgyYz40LLO4qprTJAOfCHZTP4mEJFeVkXSECQ0NqfqIWd9SXDmYLVdTwCRvLDqQToc6qy2acruYuNcLWxHvzOG1Kwe+MeVFu1mpXb3E5R1zJXSKKX396MrNqOLVfUjH1KRNok13n3cJQgtDtafE7NfNJtnWAQYAOnumVLYDl/zAAAAAElFTkSuQmCC);
+    opacity: 1;
+    height: 30px;
+    margin-top: 8px;
+}
+.mapReviewWrapper {
+    /*margin-top: 60px;*/
+    /*height: 100%;*/
+    position: relative;
+    padding: 15px;
+}
+.mapReviewItem {
+    margin-bottom: 25px;
+}
+
+.mapReviewHeader {
+    background-color: #ff8663;
+    border-radius: 8px 8px 0 0;
+    color: white;
+    fill: white;
+    font-size: 12px;
+    font-weight: 300;
+    width: 100%;
+    height: 100%;
+    padding: 15px 25px;
+    display: flex;
+    margin: -15px -15px 15px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: space-between;
+}
+
+.mapReviewHeader::before {
+    color: white;
+    fill: white;
+    /* position: absolute;
+    left: 0;
+    top: 0; */
+    content: "";
+    display: block;
+    margin-right: 8px;
+    width: 13px;
+    height: 16px;
+    margin-top: 3px;
+    flex: 13px 0 0;
+    background: url(data:image/svg+xml;base64,PHN2ZyBhcmlhLWhpZGRlbj0idHJ1ZSIgZm9jdXNhYmxlPSJmYWxzZSIgZGF0YS1wcmVmaXg9ImZhcyIgZGF0YS1pY29uPSJtYXAtbWFya2VyLWFsdCIgY2xhc3M9InN2Zy1pbmxpbmUtLWZhIGZhLW1hcC1tYXJrZXItYWx0IGZhLXctMTIiIHJvbGU9ImltZyIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB2aWV3Qm94PSIwIDAgMzg0IDUxMiI+PHBhdGggZmlsbD0id2hpdGUiIGQ9Ik0xNzIuMjY4IDUwMS42N0MyNi45NyAyOTEuMDMxIDAgMjY5LjQxMyAwIDE5MiAwIDg1Ljk2MSA4NS45NjEgMCAxOTIgMHMxOTIgODUuOTYxIDE5MiAxOTJjMCA3Ny40MTMtMjYuOTcgOTkuMDMxLTE3Mi4yNjggMzA5LjY3LTkuNTM1IDEzLjc3NC0yOS45MyAxMy43NzMtMzkuNDY0IDB6TTE5MiAyNzJjNDQuMTgzIDAgODAtMzUuODE3IDgwLTgwcy0zNS44MTctODAtODAtODAtODAgMzUuODE3LTgwIDgwIDM1LjgxNyA4MCA4MCA4MHoiPjwvcGF0aD48L3N2Zz4=) 0 0  no-repeat;
+}
+
+.mapReviewItem .userName {
+    font-size: 16px;
+    font-weight: 600;
+    margin-right: 10px;
+
+}
+.mapReviewItem .orgName {
+    font-size: 16px;
+    margin-right: 10px;
+}
+
+.mapReviewItem  .time {
+    font-size: 14px;
+}
+.mapReviewItem .reviewText {
+    display: block
+}
+
+.mapReviewForm {
+    /*height: 330px;*/
+}
+.mapReviewItems {
+    /*overflow-y: scroll;*/
+}
+.mapReview .mapReviewH1 {
+    color: #ff8663;
+    font-weight: 600;
+    text-transform: uppercase;
+    margin-bottom: 15px;
+    border-top: 1px solid #f0f0f0;
+    padding-top: 15px;
+}
+.mapReviewForm .form-row {
+    margin-bottom: 15px;
+}
+.mapReviewForm .form-row input, 
+.mapReviewForm .form-row textarea,
+.mapReviewForm .form-row button {
+    border: 1px solid #c4c4c4;
+    border-radius: 16px;
+    padding: 10px 15px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.mapReviewForm .form-row .mapReviewFormSubmit {
+    background-color: #ff8663;
+    color: white;
+    border: 0;
+    width: auto;
+    margin-bottom: 15px;
+    float: right;
 }
