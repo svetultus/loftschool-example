@@ -67,8 +67,8 @@ ymaps.ready(function () {
         '</div>' ;
     var customClusterContentLayoutHTML = 
         '<div class="mapReview">'+
-            '<div>' +
-                '<div >' +
+            '<div class="mapReviewClusterItem">' +
+                '<div class="orgName">' +
                     '{{ properties.review.orgName|raw }}' +
                 '</div>' +
                 '<div class="address">' +
@@ -76,10 +76,10 @@ ymaps.ready(function () {
                         '{{ properties.review.address|raw }}' +
                     '</a>' +
                 '</div>' +
-                '<div>' +
+                '<div class="reviewText">' +
                     '{{ properties.review.reviewText|raw }}' +
                 '</div>' +
-                '<div>' +
+                '<div class="time">' +
                     '{{ properties.review.time|raw }}' +
                 '</div>' +
             '</div>' +
@@ -89,7 +89,6 @@ ymaps.ready(function () {
             build:  function () {
                 customItemContentLayout.superclass.build.call(this);
                 let form = document.getElementById('mapReviewForm');
-                console.log(this);
 
                 form.onsubmit = this.onMapReviewFormSubmit;
             },
@@ -118,8 +117,8 @@ ymaps.ready(function () {
                     coords: currentCoords
                 };
                 
-                Object.defineProperty(review, "coords", {enumerable: false});
-                Object.defineProperty(review, "address", {enumerable: false});
+                // Object.defineProperty(review, "coords", {enumerable: false});
+                // Object.defineProperty(review, "address", {enumerable: false});
 
                 reviewItems.insertBefore(makeHtmlReview(review), reviewItem);
                 if (reviewItemsEmpty) {
@@ -129,7 +128,6 @@ ymaps.ready(function () {
                 let Placemark = new ymaps.Placemark(currentCoords, {
                     balloonContentHeader: address,
                     review: review,
-                    balloonContentFooter: 'sfdsfsf',
                 }, {
                     balloonContentBodyLayout: customItemContentLayout,
                     balloonPanelMaxMapArea: 0,
@@ -137,6 +135,7 @@ ymaps.ready(function () {
                     preset: 'islands#violetIcon'
                 });
                 reviews[count++] = review;
+                saveInStorage(review);
 
                 this.userName.value = '';
                 this.orgName.value = '';
@@ -171,6 +170,8 @@ ymaps.ready(function () {
             }
         }
     );
+
+    
     
     window.clusterer = new ymaps.Clusterer({
         preset: 'islands#invertedVioletClusterIcons',
@@ -178,6 +179,8 @@ ymaps.ready(function () {
         clusterBalloonContentLayout: 'cluster#balloonCarousel',
         clusterBalloonItemContentLayout: customClusterContentLayout
     });
+
+    initData();
 
     myMap.geoObjects.add(clusterer);
 
@@ -233,6 +236,35 @@ ymaps.ready(function () {
                 
             });
     }
+
+    function initData () {
+        console.log(reviews);
+
+        reviews = getFromStorage();
+
+        console.log(reviews);
+
+        reviews.forEach(element => {
+            let review = {
+                userName: element.userName,
+                orgName: element.orgName,
+                time: element.time,
+                reviewText: element.reviewText,
+                address: element.address,
+                coords: element.coords
+            };
+            let Placemark = new ymaps.Placemark(element.coords, {
+                balloonContentHeader: element.address,
+                review: review,
+            }, {
+                balloonContentBodyLayout: customItemContentLayout,
+                balloonPanelMaxMapArea: 0,
+                hasBalloon: false,
+                preset: 'islands#violetIcon'
+            });
+            window.clusterer.add(Placemark);
+        });
+    }
 })
 
 function makeHtmlReview (obj) {
@@ -240,11 +272,56 @@ function makeHtmlReview (obj) {
     wrapper.setAttribute('class', 'mapReviewItem');
 
     for (let key in obj) {
-        let elem = document.createElement('span');
-        elem.innerText = obj[key];
-        elem.setAttribute('class', key);
-        wrapper.appendChild(elem);
+        if (!(key === 'coords' || key === 'address')) {
+            let elem = document.createElement('span');
+            elem.innerText = obj[key];
+            elem.setAttribute('class', key);
+            wrapper.appendChild(elem);
+        }  
     }
     return wrapper;
 }
+
+function storageAvailable(type) {
+	try {
+		var storage = window[type],
+			x = '__storage_test__';
+		storage.setItem(x, x);
+		storage.removeItem(x);
+		return true;
+	}
+	catch(e) {
+		return false;
+	}
+}
+
+function saveInStorage (newReview) {
+    if (storageAvailable('localStorage')) {
+        let storage = localStorage;
+
+        let reviews = JSON.parse(storage.getItem('reviews'));
+
+        if (reviews === null) {
+            reviews = [];
+        };
+        reviews.push(newReview);
+        
+        storage['reviews'] = JSON.stringify(reviews);
+
+    }
+}
+
+function getFromStorage () {
+    if (storageAvailable('localStorage')) {
+        let storage = localStorage;
+        let reviews = JSON.parse(storage.getItem('reviews'));
+
+        if (reviews === null) {
+            reviews = [];
+        };
+
+        return reviews;
+    }
+}
+
 

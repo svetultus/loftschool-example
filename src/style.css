@@ -6,9 +6,9 @@ ymaps .ymaps-2-1-74-balloon_layout_normal {
     font-size: 15px;
     font-family: 'Fira Sans', 'Arial', sans-serif;
     color: #4f4f4f;
-    min-width: 380px;
+    /* min-width: 380px;
     min-height: 530px;
-    margin: auto;
+    margin: auto; */
 }
 
 .ymaps-2-1-74-balloon .ymaps-2-1-74-balloon__layout {
@@ -17,14 +17,15 @@ ymaps .ymaps-2-1-74-balloon_layout_normal {
 .ymaps-2-1-74-balloon__close + .ymaps-2-1-74-balloon__content {
     padding-right: 15px !important;
     margin-right: 0 !important;
-    padding: 0;
+    /* padding: 0; */
     width: 100%;
 }
 .ymaps-2-1-74-balloon .ymaps-2-1-74-balloon__content > ymaps {
     /*overflow: hidden !important;*/
     width: 100% !important;
-    min-width: 335px; 
-    min-height: 530px; 
+    overflow: visible !important;
+    /* min-width: 335px; 
+    min-height: 530px;  */
 }
 .ymaps-2-1-74-balloon__close .ymaps-2-1-74-balloon__close-button {
     background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAwAAAAMCAYAAABWdVznAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyRpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMy1jMDExIDY2LjE0NTY2MSwgMjAxMi8wMi8wNi0xNDo1NjoyNyAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENTNiAoTWFjaW50b3NoKSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDpDREJGOTI2NTkyQjkxMUU5QTc1OEJFOUEzNkI2NTI3NiIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDpDREJGOTI2NjkyQjkxMUU5QTc1OEJFOUEzNkI2NTI3NiI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSJ4bXAuaWlkOkNEQkY5MjYzOTJCOTExRTlBNzU4QkU5QTM2QjY1Mjc2IiBzdFJlZjpkb2N1bWVudElEPSJ4bXAuZGlkOkNEQkY5MjY0OTJCOTExRTlBNzU4QkU5QTM2QjY1Mjc2Ii8+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3JkZjpSREY+IDwveDp4bXBtZXRhPiA8P3hwYWNrZXQgZW5kPSJyIj8+erc7wgAAAI9JREFUeNqUkV0KgzAQhEfbt57PFHo/vYDgyYz40LLO4qprTJAOfCHZTP4mEJFeVkXSECQ0NqfqIWd9SXDmYLVdTwCRvLDqQToc6qy2acruYuNcLWxHvzOG1Kwe+MeVFu1mpXb3E5R1zJXSKKX396MrNqOLVfUjH1KRNok13n3cJQgtDtafE7NfNJtnWAQYAOnumVLYDl/zAAAAAElFTkSuQmCC);
@@ -34,9 +35,14 @@ ymaps .ymaps-2-1-74-balloon_layout_normal {
 }
 .mapReviewWrapper {
     /*margin-top: 60px;*/
-    /*height: 100%;*/
+    /* height: 100%; */
     position: relative;
     padding: 15px;
+    margin: -25px -30px;
+    min-width: 380px;
+    min-height: 530px;
+    width: 100%;
+    box-sizing: border-box; 
 }
 .mapReviewItem {
     margin-bottom: 25px;
@@ -49,16 +55,15 @@ ymaps .ymaps-2-1-74-balloon_layout_normal {
     fill: white;
     font-size: 12px;
     font-weight: 300;
-    width: 100%;
-    height: 100%;
-    padding: 15px 25px;
+    padding: 15px 35px 15px;
+    /* width: 100%;*/
+    /* height: 100%; */
+    /* margin: -25px -30px; */
     display: flex;
-    margin: -15px -15px 15px;
-    box-sizing: border-box;
-    display: flex;
-    flex-direction: column;
+    flex-direction: row;
     align-items: stretch;
     justify-content: space-between;
+    /* box-sizing: border-box; */
 }
 
 .mapReviewHeader::before {
@@ -98,8 +103,11 @@ ymaps .ymaps-2-1-74-balloon_layout_normal {
 .mapReviewForm {
     /*height: 330px;*/
 }
+.mapReview_formWrapper {
+    padding: 15px;
+}
 .mapReviewItems {
-    /*overflow-y: scroll;*/
+    padding: 15px;
 }
 .mapReview .mapReviewH1 {
     color: #ff8663;
@@ -127,6 +135,27 @@ ymaps .ymaps-2-1-74-balloon_layout_normal {
     color: white;
     border: 0;
     width: auto;
-    margin-bottom: 15px;
+    margin-bottom: 30px;
     float: right;
+}
+
+.mapReviewForm .form-row input:focus, 
+.mapReviewForm .form-row textarea:focus,
+.mapReviewForm .form-row button:focus {
+    outline: 0;
+    border-color: #ff8663;
+    box-shadow: 2px 2px 2px grey;
+}
+.ymaps-2-1-74-b-cluster-carousel__content {
+    position: relative;
+    padding-bottom: 30px;
+    box-sizing: border-box !important;
+}
+.mapReviewClusterItem {
+   
+}
+.mapReviewClusterItem .time {
+    position: absolute;
+    bottom: 20px;
+    right: 0;
 }
